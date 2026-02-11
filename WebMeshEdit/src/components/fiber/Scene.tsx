@@ -1,5 +1,9 @@
+import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
-import { div } from "three/tsl";
+import { RotationMesh } from "./RotationMesh";
+import { Environment, ContactShadows} from "@react-three/drei";
+import * as THREE from "three";
+import {EffectComposer, Bloom, SSAO, SMAA} from "@react-three/postprocessing";
 
 
 
@@ -14,24 +18,33 @@ export const Scene: React.FC<SceneProps> = ({bgColor, modelUrl }) => {
 
     return (
         <div className="relative w-full h-full">
-        <Canvas shadows style={{ position: 'absolute' }}>
+        <Canvas
+                shadows
+                style={{ position: 'absolute' }}
+                gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, outputColorSpace: THREE.SRGBColorSpace }}
+        >
             <color attach="background" args={[bgColor]}/>
 
-            {/* Setup Simple Light */}
+            <Suspense fallback={null}>   
+                <Environment preset="sunset" />
+                <RotationMesh isRotating={true} speed={1} />
 
-            <directionalLight
-                position={[5,5,5]}
-                intensity={2}
-                castShadow 
-            />
+                {/* Soft Shadow under mesh*/}
+                <ContactShadows
+                position={[0,-1,0]}
+                opacity={0.6}
+                scale={10}
+                blur={2.5}
+                far={4}
+                />
+            </Suspense>
 
-
-            {/* Simple Box Object */}
-
-            <mesh position={[0,0,0]}>
-                <boxGeometry args={[1,1,1]} />
-                <meshStandardMaterial color="red" />
-            </mesh>
+            {/* Postproces */}
+            <EffectComposer enableNormalPass>
+                <SSAO intensity={1.5} radius={0.4} luminanceInfluence={0.5} color={new THREE.Color('black')}/>
+                <Bloom luminanveThreshold={1} nipmapBlur intensity={0.5}/>
+                <SMAA />
+            </EffectComposer>
 
         </Canvas>
         </div>

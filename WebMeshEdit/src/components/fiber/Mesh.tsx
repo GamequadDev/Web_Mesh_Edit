@@ -79,8 +79,16 @@ export const Mesh = ({ modelUrl, brush, speed }: MeshProps) => {
                         >
                             <meshStandardMaterial 
                                 map={texture} 
-                                roughness={origMat.roughness || 0.5}
+
+                                metalness={origMat.metalness} 
+                                roughness={origMat.roughness}
                                 normalMap={origMat.normalMap}
+
+                                metalnessMap={origMat.metalnessMap} 
+                                roughnessMap={origMat.roughnessMap} 
+                                aoMap={origMat.aoMap} // (Ambient Occlusion - dodaje realizmu w szczelinach)
+                                emissive={origMat.emissive} // W razie gdyby radio miało świecące diody!
+                                emissiveMap={origMat.emissiveMap}
                             />
                         </mesh>
                     );

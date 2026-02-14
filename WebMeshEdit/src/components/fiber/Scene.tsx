@@ -26,43 +26,42 @@ export const Scene: React.FC<SceneProps> = ({ bgColor, modelUrl, brush, rotation
         }
     }, [exportTrigger]);
 
-    const handleExport = () => {
+    const handleExport = async () => {
         if (!groupRef.current) return;
 
         const exporter = new GLTFExporter();
         const clone = groupRef.current.clone(true);
         const nodesToRemove: THREE.Object3D[] = [];
+        
+        // ZMIANA 2: Tablica na obietnice (Promises) ładowania obrazków
+        const texturePromises: Promise<void>[] = [];
 
         clone.traverse((node: any) => {
-            // 1. Zbieramy światła i pomocniki
             if (node.isLight || node.isHelper) {
                 nodesToRemove.push(node);
-                return; // Skok do następnego elementu
+                return;
             }
 
-            // 2. Obsługa siatki (Mesh) i wymuszenie "prawdziwego" obrazka
             if (node.isMesh) {
                 const oldMat = node.material as THREE.MeshStandardMaterial;
-
-                // Czysty materiał bazowy
                 const safeMaterial = new THREE.MeshStandardMaterial({
                     color: oldMat.color,
-                    roughness: 1,
-                    metalness: 0
+                    roughness: oldMat.roughness, // Pobiera błysk z ekranu
+                    metalness: oldMat.metalness, // Pobiera metaliczność z ekranu
+                    normalMap: oldMat.normalMap, // Zapisuje ewentualne nierówności
                 });
 
-                // Jeśli mamy teksturę malowaną (CanvasTexture lub Texture)
                 if (oldMat.map && oldMat.map.image) {
                     try {
                         let dataUrl = "";
                         const sourceImage = oldMat.map.image;
+                        
+                        // WYCIĄGAMY WARTOŚĆ TUTAJ, zanim wejdziemy w Promise
+                        const originalFlipY = oldMat.map.flipY; 
 
-                        // Konwersja zawartości tekstury na twardy link base64
                         if (sourceImage instanceof HTMLCanvasElement) {
-                            // To jest Twój przypadek - malowany canvas
                             dataUrl = sourceImage.toDataURL("image/png");
                         } else if (sourceImage instanceof HTMLImageElement) {
-                            // Jeśli to zwykły obrazek
                             const tempCanvas = document.createElement("canvas");
                             tempCanvas.width = sourceImage.width;
                             tempCanvas.height = sourceImage.height;
@@ -71,19 +70,30 @@ export const Scene: React.FC<SceneProps> = ({ bgColor, modelUrl, brush, rotation
                             dataUrl = tempCanvas.toDataURL("image/png");
                         }
 
-                        // Jeśli mamy dane, tworzymy "głupią" teksturę obrazkową
                         if (dataUrl) {
-                            const newImg = new Image();
-                            newImg.src = dataUrl;
-                            const newTexture = new THREE.Texture(newImg);
-                            newTexture.needsUpdate = true;
-                            // Ważne: kopiujemy też ustawienia układu UV, żeby malowanie pasowało
-                            newTexture.flipY = oldMat.map.flipY; 
-                            
-                            safeMaterial.map = newTexture;
+                            const imagePromise = new Promise<void>((resolve) => {
+                                const newImg = new Image();
+                                newImg.onload = () => {
+                                    const newTexture = new THREE.Texture(newImg);
+                                    newTexture.needsUpdate = true;
+                                    
+                                    // UŻYWAMY ZAPISANEJ WARTOŚCI
+                                    newTexture.flipY = originalFlipY; 
+                                    
+                                    safeMaterial.map = newTexture;
+                                    resolve();
+                                };
+                                newImg.onerror = () => {
+                                    console.warn("Nie udało się załadować obrazka do eksportu.");
+                                    resolve();
+                                };
+                                newImg.src = dataUrl;
+                            });
+
+                            texturePromises.push(imagePromise);
                         }
                     } catch (e) {
-                        console.warn("Nie udało się odczytać mapy, eksportuję bez tekstury.", e);
+                        console.warn("Nie udało się odczytać mapy.", e);
                     }
                 }
 
@@ -91,10 +101,13 @@ export const Scene: React.FC<SceneProps> = ({ bgColor, modelUrl, brush, rotation
             }
         });
 
-        // 3. Usuwamy śmieci
+        // Usuwamy śmieci
         nodesToRemove.forEach(node => node.parent?.remove(node));
 
-        // 4. Parsowanie
+        // ZMIANA 4: Zatrzymujemy kod i czekamy, aż wszystkie obrazki się załadują!
+        await Promise.all(texturePromises);
+
+        // ZMIANA 5: Dopiero teraz odpalamy eksportera
         exporter.parse(
             clone,
             (result) => {
@@ -103,7 +116,7 @@ export const Scene: React.FC<SceneProps> = ({ bgColor, modelUrl, brush, rotation
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(blob);
                     link.download = 'moj_model_pomalowany.glb';
-                    document.body.appendChild(link); // Dla bezpieczeństwa w niektórych przeglądarkach
+                    document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
                 }

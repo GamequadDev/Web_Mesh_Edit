@@ -6,6 +6,14 @@ interface ToolbarProps {
   setBrush: React.Dispatch<React.SetStateAction<BrushSettings>>;
 }
 
+// Lista dostępnych tekstur (upewnij się, że masz te pliki w folderze public/textures/)
+const TEXTURES = [
+  { name: 'Trawa', url: '/textures/grass.jpg' },
+  { name: 'Kamień', url: '/textures/stone.jpg' },
+  { name: 'Rdza', url: '/textures/rust.jpg' },
+  { name: 'Drewno', url: '/textures/wood.jpg' }
+];
+
 export const Toolbar: React.FC<ToolbarProps> = ({ brush, setBrush }) => {
   
   const handleSizeChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -37,16 +45,43 @@ export const Toolbar: React.FC<ToolbarProps> = ({ brush, setBrush }) => {
         <>
           <div className="h-8 w-[1px] bg-gray-300" /> {/* Seperator */}
 
-          {/* Color select */}
-          <div className="flex gap-2">
-            {['#ff0000', '#00ff00', '#3b82f6', '#000000'].map(color => (
-              <button
-                key={color}
-                onClick={() => setBrush(prev => ({ ...prev, color }))}
-                className={`w-6 h-6 rounded-full border-2 transition-all ${brush.color === color ? 'scale-125 border-gray-400' : 'border-transparent'}`}
-                style={{ backgroundColor: color }}
-              />
-            ))}
+          <div className="flex flex-col gap-2">
+            <span className="text-[10px] font-bold text-gray-400 uppercase text-center -mb-1">Kolory</span>
+            <div className="flex gap-2">
+              {['#ff0000', '#00ff00', '#3b82f6', '#000000'].map(color => (
+                <button
+                  key={color}
+                  // WAŻNE: Resetujemy textureUrl na null, aby wymusić użycie koloru
+                  onClick={() => setBrush(prev => ({ ...prev, color, textureUrl: null }))}
+                  className={`w-6 h-6 rounded-full border-2 transition-all ${brush.color === color && !brush.textureUrl ? 'scale-125 border-gray-400' : 'border-transparent'}`}
+                  style={{ backgroundColor: color }}
+                  title={color}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="h-8 w-[1px] bg-gray-300" /> {/* Seperator */}
+
+          {/* Texture select */}
+          <div className="flex flex-col gap-2">
+            <span className="text-[10px] font-bold text-gray-400 uppercase text-center -mb-1">Tekstury</span>
+            <div className="flex gap-2">
+              {TEXTURES.map(tex => (
+                <button
+                  key={tex.name}
+                  // Ustawiamy textureUrl na wybrany obrazek
+                  onClick={() => setBrush(prev => ({ ...prev, textureUrl: tex.url }))}
+                  className={`w-6 h-6 rounded-full border-2 transition-all bg-gray-200 ${brush.textureUrl === tex.url ? 'scale-125 border-gray-400' : 'border-transparent'}`}
+                  style={{ 
+                    backgroundImage: `url(${tex.url})`, 
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                  }}
+                  title={tex.name}
+                />
+              ))}
+            </div>
           </div>
 
           <div className="h-8 w-[1px] bg-gray-300" /> {/* Seperator */}

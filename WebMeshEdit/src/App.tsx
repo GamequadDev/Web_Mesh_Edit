@@ -5,6 +5,7 @@ import { Uploader } from "@/components/ui/Uploader";
 import React, {useState} from "react";
 import { Toolbar } from "@/components/ui/Toolbar";
 import type { BrushSettings } from "@/types/Brush";
+import { MeshSettings } from "@/components/ui/MeshSettings";
 
 
 function App() {
@@ -21,6 +22,10 @@ function App() {
     mode: 'orbit'
   });
 
+const [isRotating, setIsRotating] = useState(true);
+const [rotationSpeed, setRotationSpeed] = useState(0.3);
+
+
   return (
     <div className="min-h-screen flex flex-col bg-amber-50 overflow-x-hidden  text-center">
 
@@ -30,7 +35,7 @@ function App() {
 
           {/* Render 3D */}
           <main className="p-2 bg-blue-900 flex-1 border-r">
-                <Scene bgColor={colorBackground} modelUrl={modelUrl} brush={brush}/>
+                <Scene bgColor={colorBackground} modelUrl={modelUrl} brush={brush} isRotating={isRotating} rotationSpeed={rotationSpeed}/>
                 <Toolbar brush={brush} setBrush={setBrush}/>
           </main>
 
@@ -38,6 +43,12 @@ function App() {
           <div className="bg-gray-200 p-10 md:w-1/5">
             Prawy
             <Uploader onModelUpload={(url) => setModelUrl(url)}/>
+            <MeshSettings 
+                isRotating={isRotating}
+                setIsRotating={setIsRotating}
+                rotationSpeed={rotationSpeed}
+                setRotationSpeed={setRotationSpeed}
+            />
           </div>
       </div>
 

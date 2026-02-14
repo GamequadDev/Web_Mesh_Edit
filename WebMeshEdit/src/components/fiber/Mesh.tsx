@@ -22,13 +22,27 @@ export const Mesh = ({isRotating = true, speed = 1, modelUrl="./models/marble_bu
     const canvas = useMemo(() => document.createElement('canvas'), []);
 
 
-    const { texture, paint, stopPainting } = usePaintableTexture();
+    const { texture, paint, stopPainting, initCanvas } = usePaintableTexture();
     const rotationRef = useRotation({isRotating,speed});
+
+    useEffect(() => {
+    const materialNames = Object.keys(materials);
+    if (materialNames.length > 0) {
+      const mainMaterial = materials[materialNames[0]];
+      if (mainMaterial.map && mainMaterial.map.image) {
+        initCanvas(mainMaterial.map.image);
+      }
+    }
+  }, [materials, initCanvas]);
+
 
     return (
     <group dispose={null} ref={rotationRef}>
         {Object.values(nodes).map((node: any, index) => {
             if (node.isMesh) {
+
+                const origMat = node.material as THREE.MeshStandardMaterial;
+
                 return (
                     <mesh
                         key={index}
@@ -66,7 +80,12 @@ export const Mesh = ({isRotating = true, speed = 1, modelUrl="./models/marble_bu
 
                     {/* Material PBR */}
 
-                    <meshStandardMaterial map={texture}/>
+                    <meshStandardMaterial map={texture} 
+                    roughness={origMat.roughness}
+                    normalMap={origMat.normalMap}
+                    transparent={origMat.transparent}
+                    envMapIntensity={origMat.envMapIntensity || 1}
+                    />
                     </mesh>
                 );
             }

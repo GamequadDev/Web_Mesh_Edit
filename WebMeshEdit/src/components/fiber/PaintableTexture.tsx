@@ -3,17 +3,13 @@ import * as THREE from "three";
 import type { ThreeEvent } from "@react-three/fiber";
 
 
-export interface BrushSettings {
-  color: string;
-  size: number;
-  mode: 'paint' | 'orbit';
-}
 
 export const usePaintableTexture = (size = 1024) => {
 
     const lastUV = useRef<{ x: number; y: number } | null>(null);
+    const canvas = useMemo(() => document.createElement('canvas'), []);
 
-    {/* Canva */}
+    {/* Canva 
 
     const canvas = useMemo(() => {
         const canva = document.createElement('canvas');
@@ -25,9 +21,27 @@ export const usePaintableTexture = (size = 1024) => {
             ctx.fillRect(0, 0, size, size);
         }
         return canva;
-    }, [size]);
+    }, [size]);*/}
 
     const texture = useMemo(() => new THREE.CanvasTexture(canvas), [canvas]);
+
+    const initCanvas = useCallback((baseImage: HTMLImageElement | HTMLCanvasElement) => {
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            // 1. Dopasuj rozmiar canvasu do oryginalnej tekstury, aby uniknąć rozciągania
+            canvas.width = baseImage.width;
+            canvas.height = baseImage.height;
+
+            // 2. Napraw problem "Flip Y"
+            ctx.save();
+            ctx.scale(1, -1); // Odwracamy skalę w osi Y
+            ctx.drawImage(baseImage, 0, 0, canvas.width, -canvas.height); // Rysujemy "do góry"
+            ctx.restore();
+
+            texture.needsUpdate = true;
+        }
+    }, [canvas, texture]);
+
     const paint = useCallback((e: ThreeEvent<PointerEvent>, color = 'red', brushSize = 30) => {
         if (!e.uv) return;
         const ctx = canvas.getContext('2d');
@@ -76,5 +90,5 @@ export const usePaintableTexture = (size = 1024) => {
         }
     }, [canvas, size, texture]);
 
-    return { texture, paint, stopPainting, clear };
+    return { texture, paint, stopPainting, clear, initCanvas};
 }

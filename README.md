@@ -1,6 +1,6 @@
 # <img src="public/Img1.png" width="1900" height="900" valign="middle"> GLB Painter
 
-**GLB Painter** is a modern, browser-based 3D graphics editor that allows paint a 3d model in real-time.
+**GLB Painter** is a modern, browser-based 3D graphics editor for painting 3D models in real-time.
 
 ## 🚀 Features
 

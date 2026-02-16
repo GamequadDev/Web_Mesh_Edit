@@ -1,6 +1,5 @@
 import { Scene } from "@/components/fiber/Scene";
 import { Navbar } from "@/layout/Navbar";
-import { Footer } from "@/layout/Footer";
 import { Uploader } from "@/components/ui/Uploader";
 import { useState } from "react";
 import { Toolbar } from "@/components/ui/Toolbar";

@@ -1,11 +1,12 @@
 import React from 'react';
-import type { ChangeEvent } from 'react';
 
 interface UploaderProps {
     onModelUpload: (modelUrl: string) => void;
 }
 
 export const Uploader: React.FC<UploaderProps> = ({ onModelUpload }) => {
+
+    /*
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -17,7 +18,7 @@ export const Uploader: React.FC<UploaderProps> = ({ onModelUpload }) => {
             const url = URL.createObjectURL(file);
             onModelUpload(url);
         }
-    };
+    };*/
 
     return (
         <label className="flex items-center justify-between px-3 py-2 bg-element-bg hover:bg-hover-bg text-txt-main border border-ui-border rounded cursor-pointer transition-all active:bg-brand group">

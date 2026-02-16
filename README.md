@@ -1,4 +1,4 @@
-# <img src="public/img1.svg" width="48" height="48" valign="middle"> WebMeshEdit
+# <img src="public/Img1.png" width="1900" height="900" valign="middle"> GLB Painter
 
 **GLB Painter** is a modern, browser-based 3D graphics editor that allows paint a 3d model in real-time.
 

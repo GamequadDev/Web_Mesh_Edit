@@ -1,0 +1,5 @@
+node_mudules
+dist
+.git
+.env
+npm-debug.log

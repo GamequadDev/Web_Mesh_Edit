@@ -1,0 +1,7 @@
+services:
+  frontend:
+    build: ./WebMeshEdit
+    ports:
+      - "80:80"
+    container_name: GLBPainter
+    restart: unless-stopped

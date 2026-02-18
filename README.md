@@ -34,17 +34,9 @@ Projekt został zbudowany przy użyciu:
 
 ---
 
-## 📦 Installation and Setup
+## 📦 Setup
 
-1.  **Install dependencies**:
+1.  **Docker compose**:
     ```bash
-    npm install
-    ```
-2.  **Run in development mode**:
-    ```bash
-    npm run dev
-    ```
-3.  **Build for production**:
-    ```bash
-    npm run build
+    docker compose up --build
     ```

@@ -5,3 +5,19 @@ services:
       - "80:80"
     container_name: GLBPainter
     restart: unless-stopped
+    depends_on:
+      - backend
+  
+  backend:
+    build: 
+      context: ./backend
+      target: development
+    container_name: backend_api
+    ports:
+        - "3000:3000"
+    volumes:
+        - .:/backend
+        - /backend/node_modules
+    environment:
+        - NODE_ENV=development
+    command: npm run dev
